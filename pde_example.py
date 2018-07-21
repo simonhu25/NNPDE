@@ -26,7 +26,7 @@ Define the parameters for the numerical method.
 We will use a step size of 1/10 in both the x and y directions.
 '''
 
-nx, ny = 10, 10
+nx, ny = 20, 20
 
 dx, dy = 1./nx, 1./ny
 
@@ -167,10 +167,10 @@ We now perform the actual training. We will use the method of gradient descent t
 # Initialize the weights randomly. One area for improvement is to decide in what way the weights
 # should be initialized.
 
-W = [npr.randn(2, 10), npr.randn(10, 1)]
-alph = 0.001
+W = [npr.randn(2, 20), npr.randn(20, 1)]
+alph = 0.01
 
-for i in range(100):
+for i in range(200):
     print('We are on iteration', i)
     loss_grad = grad(loss_function)(W, x_space, y_space)
 
@@ -190,15 +190,20 @@ print(loss_function(W, x_space, y_space))
 
 surface_analytic = np.zeros((ny, nx))
 surface_approx = np.zeros((ny, nx))
+surface_loss = np.zeros((ny, nx))
 
 for i, x in enumerate(x_space):
     for j, y in enumerate(y_space):
         surface_analytic[i][j] = analytic_solution([x, y])
 
 for i, x in enumerate(x_space):
-    for j,y in enumerate(y_space):
+    for j, y in enumerate(y_space):
         net_out_surface = neural_network(W, [x, y])[0]
         surface_approx[i][j] = psi_trial([x, y], net_out_surface)
+
+for i, x in enumerate(x_space):
+    for j, y in enumerate(y_space):
+        surface_loss[i][j] = surface_analytic[i][j] - surface_approx[i][j]
 
 # Plot the surface and set the axes properties as required. This plots the analytic solution.
 
@@ -220,6 +225,20 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 X, Y = np.meshgrid(x_space, y_space)
 surf = ax.plot_surface(X, Y, surface_approx, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False)
+
+ax.set_xlim(0,1)
+ax.set_ylim(0,1)
+ax.set_zlim(0,3)
+
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+
+# Plot the loss. This is defined as the difference between the analytic and the approximate
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+X, Y = np.meshgrid(x_space, y_space)
+surf = ax.plot_surface(X, Y, surface_loss, rstride=1, cstride=1, cmap=cm.viridis, linewidth=0, antialiased=False)
 
 ax.set_xlim(0,1)
 ax.set_ylim(0,1)
